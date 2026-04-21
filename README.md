@@ -3,6 +3,7 @@
 <div align="center">
 
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6)
+![Release](https://img.shields.io/github/v/release/oreo933/media-subtitle-local?display_name=tag)
 ![Python](https://img.shields.io/badge/python-3.11%2B-3776AB)
 ![GUI](https://img.shields.io/badge/gui-PySide6-41CD52)
 ![Local First](https://img.shields.io/badge/workflow-local--first-111827)
