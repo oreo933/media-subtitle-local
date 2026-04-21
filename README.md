@@ -79,7 +79,7 @@ python -m app.main
 如果系统默认 `python` 指向 Windows 商店桩程序，可显式指定解释器：
 
 ```powershell
-./scripts/build_windows.ps1 -Mode launcher -PythonExe "C:\\Users\\你的用户名\\.workbuddy\\binaries\\python\\versions\\3.11.9\\python.exe"
+./scripts/build_windows.ps1 -Mode launcher -PythonExe "D:\\tools\\python311\\python.exe"
 ```
 
 如果依赖已提前安装，可加 `-SkipInstall` 提速：
