@@ -387,6 +387,12 @@ Recommended contribution directions:
 
 ---
 
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for release history and notable updates.
+
+---
+
 ## License
 
 MIT License
