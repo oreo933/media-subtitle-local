@@ -1,50 +1,206 @@
-## Media Subtitle Local（Windows 本地离线字幕工具）
+# Media Subtitle Local
 
-这是一个本地离线运行的桌面软件：批量扫描视频、提取音频、识别英文/日文语音并翻译为中文字幕，默认输出 `.zh.srt` 到视频同目录。
+<div align="center">
 
-### 功能特性
-- **本地离线**：默认不走网络 API，不上传视频内容。
-- **批处理目录**：选择一个文件夹即可批量处理。
-- **可视化 GUI**：查看提取、识别、翻译阶段状态与日志。
-- **资源控制**：内存/显存以约 `5GB` 为推荐目标，自动节流与重试。
-- **后端可选**：
-  - `llama.cpp`（推荐，Gemma Q4）
-  - `Whisper + Marian`（备用）
+![Platform](https://img.shields.io/badge/platform-Windows-0078D6)
+![Python](https://img.shields.io/badge/python-3.11%2B-3776AB)
+![GUI](https://img.shields.io/badge/gui-PySide6-41CD52)
+![Local First](https://img.shields.io/badge/workflow-local--first-111827)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-### 目录结构
-- `app/main.py`：程序入口
-- `app/ui/`：主界面与组件
-- `app/services/`：提取、流水线、字幕写出
-- `app/engines/`：模型适配层
-- `app/core/`：配置、日志、资源监控
+**Windows 本地离线视频字幕生成与翻译工具**  
+**Local-first subtitle transcription and translation for Windows**
 
-### 环境准备（Windows）
-1. 安装 Python 3.11+
-2. 安装 FFmpeg，并确保 `ffmpeg` 在 PATH 中
-   - 如果不想改 PATH，可设置环境变量：`FFMPEG_CMD=C:\\path\\to\\ffmpeg.exe`
-3. 安装依赖：
+一个面向 **本地批量处理视频** 场景的桌面应用：扫描视频、提取音频、生成原文字幕，并翻译输出中文字幕。项目强调 **离线、可控、可观察、可继续扩展**。
 
+</div>
+
+---
+
+## Highlights
+
+- **Local-first**：尽量不上传视频内容，降低隐私风险
+- **Batch workflow**：支持单文件与文件夹批量处理
+- **Desktop GUI**：任务队列、处理阶段、日志状态都可视化
+- **Dual backend path**：支持 `llama.cpp + Gemma` 与 `Whisper + Marian`
+- **Windows packaging ready**：提供 PowerShell 打包脚本
+- **Developer-friendly**：模块结构清晰，便于继续二次开发
+
+---
+
+## 为什么做这个项目
+
+这个项目的出发点其实很直接：**有一些影片本身只有英语或日语语音，但还没有现成字幕，或者现有字幕并不方便直接使用。**
+
+很多时候，大家其实只是想更高效地解决一个实际问题：
+
+> **把没有字幕、或者字幕不完整的英文 / 日文影片，在本地尽快整理成可用的中文字幕。**
+
+Media Subtitle Local 就是围绕这个需求来设计的。项目希望把这件事做得更顺手一些：
+
+- 可以直接批量处理视频
+- 可以在本地完成音频提取、识别和翻译
+- 可以看到任务状态和运行日志
+- 可以继续扩展和调整后端能力
+
+它的重点不是追求花哨，而是尽量把“没有字幕可用”这件事，变成一个更容易处理的本地工作流。
+
+---
+
+## 项目定位
+
+这不是一个在线视频平台抓字幕工具，也不是一个依赖远程大模型服务的云端产品客户端。
+
+它更适合被理解为：
+
+> **一套本地优先、面向 Windows 的字幕处理应用骨架。**
+
+既可以直接拿来跑，也适合作为：
+
+- 本地字幕工具的二次开发基础
+- 离线转写 / 翻译流水线样板
+- GUI + 模型推理 + 批处理编排的参考项目
+
+---
+
+## Core Features
+
+### 1. 本地离线处理
+- 默认不依赖云端字幕 API
+- 适合隐私敏感内容的本地处理场景
+- 输出文件保留在视频所在目录
+
+### 2. 批量视频处理
+- 支持单文件模式
+- 支持按文件夹批量扫描
+- 支持任务队列式处理与状态展示
+
+### 3. 字幕生成与翻译
+- 音频提取
+- 原文字幕生成
+- 中文字幕翻译输出
+- 默认输出：
+  - `xxx.src.srt`
+  - `xxx.zh.srt`
+
+### 4. 可视化 GUI
+- 主界面选择输入目标
+- 任务表显示处理阶段
+- 日志面板展示运行过程
+- 更适合长时间批处理观察
+
+### 5. 资源控制与可扩展性
+- 加入基础资源监控能力
+- 支持后端替换与后续增强
+- 适合作为继续工程化的起点
+
+---
+
+## 处理流程
+
+```text
+Scan videos
+  -> Extract audio with FFmpeg
+  -> Transcribe with ASR backend
+  -> Translate subtitle text
+  -> Write .src.srt / .zh.srt
+  -> Update GUI status and logs
+```
+
+默认输出文件位于原视频同目录：
+
+- `xxx.src.srt`：原文字幕
+- `xxx.zh.srt`：中文字幕
+
+---
+
+## Project Structure
+
+```text
+app/
+  core/        configuration, logging, resource monitoring, models
+  engines/     backend adapters (llama.cpp / whisper / translation)
+  services/    audio extraction, pipeline orchestration, subtitle writing
+  ui/          main window and UI widgets
+  utils/       file scan, timecode, helper utilities
+scripts/
+  build_windows.ps1   Windows build script
+assets/
+  icons/       application icons
+launcher.py    launcher entry
+requirements.txt
+```
+
+---
+
+## Tech Stack
+
+- **GUI**: PySide6
+- **ASR**: faster-whisper
+- **Translation / inference**: transformers / ctranslate2 / local LLM route
+- **Local LLM serving**: llama.cpp
+- **Packaging**: PyInstaller
+- **System monitoring**: psutil / pynvml
+
+---
+
+## Environment Requirements
+
+### System
+- Windows 10 / 11
+- Python 3.11+
+- FFmpeg available in PATH or configurable by environment variable
+
+### Python Dependencies
+
+See `requirements.txt`:
+
+- `PySide6`
+- `faster-whisper`
+- `ctranslate2`
+- `transformers`
+- `sentencepiece`
+- `torch`
+- `requests`
+- `psutil`
+- `pynvml`
+- `pyinstaller`
+
+Install dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### llama.cpp 调用方式（推荐）
-程序会优先使用项目目录 `models/` 下的模型文件：
-- `models/gemma-4-E2B-it-Uncensored-MAX.Q4_K_M.gguf`
+If FFmpeg is not in PATH, you can set it manually:
 
-运行时策略：
-- **识别阶段**：`faster-whisper` 转写 + `Gemma` 本地纠错
-- **翻译阶段**：`Gemma` 翻译为简体中文字幕
+```powershell
+$env:FFMPEG_CMD="C:\tools\ffmpeg\bin\ffmpeg.exe"
+```
 
-如果本机已装 `llama-server` 并在 PATH 中，程序会自动尝试拉起服务（默认 `127.0.0.1:8080`）。
-也可手动启动：
+---
+
+## Recommended Backend: llama.cpp
+
+The project supports a local `llama.cpp` service path.
+
+Recommended model path example:
+
+```text
+models/gemma-4-E2B-it-Uncensored-MAX.Q4_K_M.gguf
+```
+
+### Runtime strategy
+- **Transcription stage**: `faster-whisper` + local correction flow
+- **Translation stage**: `Gemma` outputs simplified Chinese subtitles
+
+### Example manual startup
 
 ```bash
 llama-server -m .\models\gemma-4-E2B-it-Uncensored-MAX.Q4_K_M.gguf --port 8080 --ctx-size 4096 --threads 6 --n-gpu-layers 20
 ```
 
-可通过环境变量覆盖：
+### Supported environment overrides
 
 - `LLAMA_CPP_BASE_URL`
 - `LLAMA_CPP_MODEL`
@@ -52,82 +208,193 @@ llama-server -m .\models\gemma-4-E2B-it-Uncensored-MAX.Q4_K_M.gguf --port 8080 -
 - `LLAMA_CPP_SERVER_CMD`
 - `LLAMA_CPP_AUTOSTART`
 
-提示：若你不想配置 PATH，可把 `llama-server.exe` 放到项目根目录或 `llama/` 目录，程序会自动搜索并优先使用。
-如果 `llama/` 下只有 `hipblaslt`、`rocblas` 这类依赖库目录，但没有 `llama-server.exe`，仍然无法启动服务。
+If `llama-server` is available in PATH, the app can try to start it automatically.  
+If not, you can also place the executable in the project root or inside `llama/`.
 
+---
 
+## Quick Start
 
+### 1. Install dependencies
 
-### 运行程序
+```bash
+python -m pip install -r requirements.txt
+```
+
+### 2. Run the application
 
 ```bash
 python -m app.main
 ```
 
-### 打包为 EXE
+### 3. Basic usage
 
-默认推荐 **launcher 模式**（稳定入口 exe，放在项目根目录）：
+1. Launch the application
+2. Choose `single file` or `folder` mode
+3. Select a target video or directory
+4. Choose a backend (recommended: `llama.cpp`)
+5. Start processing
+6. Watch progress in the task table and log panel
+
+---
+
+## Build for Windows
+
+### Launcher mode (recommended)
 
 ```powershell
 ./scripts/build_windows.ps1 -Mode launcher
 ```
 
-执行后会生成：`./MediaSubtitleLocal.exe`（就在根目录）。
+This generates:
 
-该模式下，`exe` 只是启动器，后续你更新 `app/` 代码通常**不需要反复重打包**；保持根目录 `MediaSubtitleLocal.exe` 不变即可。
-
-如果系统默认 `python` 指向 Windows 商店桩程序，可显式指定解释器：
-
-```powershell
-./scripts/build_windows.ps1 -Mode launcher -PythonExe "D:\\tools\\python311\\python.exe"
+```text
+MediaSubtitleLocal.exe
 ```
 
-如果依赖已提前安装，可加 `-SkipInstall` 提速：
+Launcher mode is the recommended distribution entry for daily use.
+
+### Specify Python interpreter
 
 ```powershell
-./scripts/build_windows.ps1 -Mode launcher -PythonExe "C:\\Users\\你的用户名\\.workbuddy\\binaries\\python\\versions\\3.11.9\\python.exe" -SkipInstall
+./scripts/build_windows.ps1 -Mode launcher -PythonExe "D:\tools\python311\python.exe"
 ```
 
-如需传统全量分发包（`dist/MediaSubtitleLocal/`），可使用：
+### Skip dependency installation
+
+```powershell
+./scripts/build_windows.ps1 -Mode launcher -PythonExe "D:\tools\python311\python.exe" -SkipInstall
+```
+
+### Full distribution mode
 
 ```powershell
 ./scripts/build_windows.ps1 -Mode full
 ```
 
+---
 
+## Screenshots
 
+> Screenshot area can be added later.
 
-### 使用说明
-1. 启动程序
-2. 选择模式：`单文件` 或 `文件夹`
-3. 选择目标文件/目录
-4. 选择后端（推荐 `llama.cpp`）
-5. 点击“开始处理”
-6. 在右侧日志和任务表中查看进度（含队列序号）
+Suggested sections:
+- Main window
+- Task queue
+- Processing log panel
+- Packaging result
 
-### 外置日志（无需手动复制报错）
-- 每次运行都会生成：`logs/run_时间戳.log`
-- 同时维护固定入口：`logs/latest.log`（始终是最近一次运行日志）
-- 当你遇到错误时，可直接查看 `logs/latest.log`
+Example markdown after adding images:
 
+```md
+![Main Window](./docs/screenshots/main-window.png)
+![Task Queue](./docs/screenshots/task-queue.png)
+```
 
-输出：
-- 原文字幕：`xxx.src.srt`
-- 中文字幕：`xxx.zh.srt`
+---
 
-### 注意事项
-- 影视内容可能包含敏感场景，本工具仍在本地离线处理，不上传素材。
-- 若 `llama.cpp` 服务未启动，翻译会回退为原文（任务不中断）。
-- 首次加载模型可能较慢，属于正常现象。
+## FAQ
 
-### 开源发布建议
-- 当前仓库已使用 **MIT License**。
-- 默认 `.gitignore` 已忽略模型、日志、打包产物与本地二进制，避免仓库体积过大。
-- 建议发布 `v0.x` 版本，先收集真实使用反馈再持续迭代。
+### Q1: Does it upload my videos to a cloud service?
+默认设计目标是 **本地优先**。项目尽量不依赖在线字幕 API，媒体内容默认在本机处理。
 
-### Roadmap（可选）
-- 批量翻译策略继续优化（按语言/长度动态 batch）。
-- 术语表与专有名词一致性增强。
-- 更多字幕后处理能力（断句、标点、口语化风格模板）。
-- 更多平台/显卡后端兼容性优化。
+### Q2: What files does it generate?
+It typically writes:
+- `xxx.src.srt`
+- `xxx.zh.srt`
 
+### Q3: What if `llama.cpp` is not available?
+Depending on current configuration, the app may fall back, degrade gracefully, or keep the pipeline partially available.
+
+### Q4: Is this production-ready?
+更准确的说法是：它已经具备较完整的工程骨架和可运行链路，但仍然适合持续迭代，而不是宣称“最终版”。
+
+### Q5: Can I use this as a base project?
+可以。这个仓库本身就适合作为本地字幕工具、离线工作流或桌面 AI 工具的二次开发基础。
+
+---
+
+## Logging and Troubleshooting
+
+The app writes local logs for easier diagnosis:
+
+- `logs/run_<timestamp>.log`
+- `logs/latest.log`
+
+When something fails, start with:
+
+```text
+logs/latest.log
+```
+
+---
+
+## Design Goals
+
+- **Run end-to-end locally**
+- **Show observable processing states**
+- **Keep the workflow practical for Windows users**
+- **Remain easy to extend and refactor**
+- **Provide a real project base instead of a one-off demo**
+
+---
+
+## Use Cases
+
+- Local English / Japanese subtitle generation
+- Chinese subtitle draft generation for videos
+- Offline subtitle workflows on Windows
+- A reference project for GUI + model inference + batch processing
+
+---
+
+## Roadmap
+
+- [ ] Improve batch translation strategy
+- [ ] Better terminology consistency
+- [ ] Stronger punctuation and segmentation post-processing
+- [ ] Better backend compatibility and device adaptation
+- [ ] Add screenshots and demo materials
+- [ ] Add sample input / output examples
+
+---
+
+## Contributing
+
+Issues, suggestions, and improvement ideas are welcome.
+
+If you want to contribute, a simple path is:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make changes with clear commits
+4. Open a pull request
+
+Recommended contribution directions:
+- Better subtitle quality
+- More robust backend management
+- UI/UX improvements
+- Windows packaging improvements
+- Better documentation and examples
+
+---
+
+## Privacy Notes
+
+- This repository is intended to stay **local-first**
+- Build artifacts, models, logs, and local binaries should not be committed by default
+- Public examples should avoid personal machine paths and private environment details
+
+---
+
+## License
+
+MIT License
+
+---
+
+## English Summary
+
+Media Subtitle Local is a Windows desktop application for local-first subtitle transcription and translation. It is designed for batch video processing, GUI visibility, offline-friendly workflows, and an architecture that can continue evolving.
+
+This repository is suitable both as a usable local subtitle tool and as a development base for building more complete desktop AI media workflows.
