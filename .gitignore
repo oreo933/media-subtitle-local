@@ -1,0 +1,45 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# Runtime logs
+logs/
+*.log
+
+# Local model files
+models/*.gguf
+models/*.bin
+models/*.safetensors
+
+# Local binaries and runtime bundles
+ffmpeg.exe
+MediaSubtitleLocal.exe
+llama/*.exe
+llama/*.dll
+llama-vulkan/*.exe
+llama-vulkan/*.dll
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# CodeBuddy local metadata
+.codebuddy/
+
+
+# OS
+Thumbs.db
+.DS_Store
